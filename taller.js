@@ -7,7 +7,7 @@ let Estado;
 let algunoAcepta;
 let esDeterministico;
 
-
+// Ejercicio 1
 function ejercicio1() {
   // Completar
   qf = {esFinal : true, transiciones : {}, acepta : function(s){return (s === "")} };
@@ -18,9 +18,10 @@ function ejercicio1() {
 
 }
 
+// Ejercicio 2
 
 function ejercicio2() {
-  	String.prototype.head = function() {
+  String.prototype.head = function() {
     return this.charAt(0);
 	}
 
@@ -30,11 +31,10 @@ function ejercicio2() {
   
 }
 
-
+// Ejercicio 3
 function ejercicio3() {
   // Completar
-
-   Estado = function(esFinal,transiciones) { this.esFinal = esFinal 
+  Estado = function(esFinal,transiciones) { this.esFinal = esFinal 
 											this.transiciones=  transiciones
 											this.acepta =  function(s) {
 												if (s === "" ){
@@ -56,25 +56,113 @@ function ejercicio3() {
   Object.setPrototypeOf(q2,q)
   Object.setPrototypeOf(q3,q)
   Object.setPrototypeOf(qf,q)
+  
 }
 
 // Ejercicio 4
 function ejercicio4() {
   // Completar
+ Estado.prototype.nuevaTransicion = function(etiqueta,destino) { let newobject = {etiqueta}
+ 																	newobject[etiqueta] = destino
+ 													 				Object.assign(this.transiciones,newobject) }
 
 }
 
 // Ejercicio 5
 function ejercicio5() {
   // Completar
-  algunoAcepta = undefined;
+  algunoAcepta = function(s,qs) {if (Array.isArray(qs)) { 
+  									return qs.some(function(e){if (s === "" ){
+													return e.esFinal
+												}
+												else{
+													let caracterAConsumir = s.head()
+													if (caracterAConsumir in e.transiciones) {
+														let siguienteEstado = e.transiciones[caracterAConsumir]
+														return siguienteEstado.acepta(s.tail())
+													}
+													return false
+												}},s)
+  								}
+  								else {
+  									return qs.acepta(s)
+  									}
+								}
   
 }
 
 // Ejercicio 6
 function ejercicio6() {
   // Completar
+  Estado.prototype.nuevaTransicionND = function(etiqueta,destino) { let newobject = {etiqueta}
+ 													newobject[etiqueta] = destino
+ 													if (etiqueta in this.transiciones) {
+ 														if (Array.isArray(this.transiciones[etiqueta])) {
+ 															if (!(destino in this.transiciones[etiqueta])) {
+ 																this.transiciones[etiqueta].push(destino)
+ 															}
+ 														}
+ 														else{
+ 															if (!(this.transiciones[etiqueta] === destino)) {
+ 																let temp = {etiqueta}
+ 																temp[etiqueta] = this.transiciones.etiqueta
+ 																this.transiciones[etiqueta] = []
+ 																this.transiciones[etiqueta].push(temp[etiqueta])
+ 																this.transiciones[etiqueta].push(newobject[etiqueta])
+ 															}
 
+ 														}
+
+ 													}
+ 													else{
+ 														Object.assign(this.transiciones, newobject)
+ 													}
+
+
+
+
+
+
+
+
+ 												/*	if (Array.isArray(this.transiciones[etiqueta])) {
+ 														if (!(destino in this.transiciones[etiqueta])){
+ 															transiciones[etiqueta].push(destino)
+ 														}
+ 													}
+													else{ 
+														if (etiqueta in this.transiciones) {
+															let temp = {etiqueta}
+ 															temp[etiqueta] = this.transiciones.etiqueta
+ 															this.transiciones[etiqueta] = []
+ 															this.transiciones[etiqueta].push(temp[etiqueta])
+ 															this.transiciones[etiqueta].push(newobject[etiqueta])
+														}
+													else{
+															Object.assign(this.transiciones, newobject)
+														}
+
+
+
+													}*/
+ 													
+
+ 													/*if (etiqueta in this.transiciones){
+ 														if (Array.isArray(this.transiciones[etiqueta])) {
+ 															this.transiciones
+ 														}
+ 														else{
+ 															let temp = {etiqueta}
+ 															temp[etiqueta] = this.transiciones.etiqueta
+ 															this.transiciones[etiqueta] = []
+ 															this.transiciones[etiqueta].push(temp[etiqueta])
+ 															this.transiciones[etiqueta]lo.push(newobject[etiqueta])
+ 														}
+ 													}
+ 													else{
+ 														Object.assign(this.transiciones,newobject)
+ 													}*/
+ 												}
 }
 
 // Ejercicio 7
