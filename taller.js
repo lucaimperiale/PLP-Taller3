@@ -35,7 +35,7 @@ function ejercicio2() {
 function ejercicio3() {
   // Completar
   Estado = function(esFinal,transiciones) { this.esFinal = esFinal 
-											this.transiciones=  transiciones
+											this.transiciones = transiciones
 											this.acepta =  function(s) {
 												if (s === "" ){
 													return this.esFinal
@@ -50,7 +50,7 @@ function ejercicio3() {
 												}
 											} };
 											
-  q = new Estado (true,{})
+  let q = new Estado (true,{})
 
   Object.setPrototypeOf(q1,q)
   Object.setPrototypeOf(q2,q)
@@ -62,9 +62,16 @@ function ejercicio3() {
 // Ejercicio 4
 function ejercicio4() {
   // Completar
- Estado.prototype.nuevaTransicion = function(etiqueta,destino) { let newobject = {etiqueta}
- 																	newobject[etiqueta] = destino
- 													 				Object.assign(this.transiciones,newobject) }
+ Estado.prototype.nuevaTransicion = function(etiqueta,destino) { if(!this.hasOwnProperty('transiciones'))
+ 																	{		
+ 													 					this.transiciones = {}
+ 													 					Object.assign(this.transiciones,Object.getPrototypeOf(this).transiciones)
+ 													 					this.transiciones[etiqueta] = destino
+ 													 				} 
+ 													 				else{
+	 													 				this.transiciones[etiqueta] = destino
+ 													 				}
+ 													 			}
 
 }
 
@@ -72,17 +79,8 @@ function ejercicio4() {
 function ejercicio5() {
   // Completar
   algunoAcepta = function(s,qs) {if (Array.isArray(qs)) { 
-  									return qs.some(function(e){if (s === "" ){
-													return e.esFinal
-												}
-												else{
-													let caracterAConsumir = s.head()
-													if (caracterAConsumir in e.transiciones) {
-														let siguienteEstado = e.transiciones[caracterAConsumir]
-														return siguienteEstado.acepta(s.tail())
-													}
-													return false
-												}},s)
+  									
+									return qs.some(function(elem){return elem.acepta(this)},s)
   								}
   								else {
   									return qs.acepta(s)
@@ -94,81 +92,97 @@ function ejercicio5() {
 // Ejercicio 6
 function ejercicio6() {
   // Completar
-  Estado.prototype.nuevaTransicionND = function(etiqueta,destino) { let newobject = {etiqueta}
- 													newobject[etiqueta] = destino
- 													if (etiqueta in this.transiciones) {
- 														if (Array.isArray(this.transiciones[etiqueta])) {
- 															if (!(destino in this.transiciones[etiqueta])) {
- 																this.transiciones[etiqueta].push(destino)
- 															}
- 														}
- 														else{
- 															if (!(this.transiciones[etiqueta] === destino)) {
- 																let temp = {etiqueta}
- 																temp[etiqueta] = this.transiciones.etiqueta
- 																this.transiciones[etiqueta] = []
- 																this.transiciones[etiqueta].push(temp[etiqueta])
- 																this.transiciones[etiqueta].push(newobject[etiqueta])
- 															}
+  // Estado.prototype.nuevaTransicionND = function(etiqueta,destino) { let newobject = {etiqueta}
+ 	// 												newobject[etiqueta] = destino
+ 	// 												if (etiqueta in this.transiciones) {
+ 	// 													if (Array.isArray(this.transiciones[etiqueta])) {
+ 	// 														if (!(destino in this.transiciones[etiqueta])) {
+ 	// 															this.transiciones[etiqueta].push(destino)
+ 	// 														}
+ 	// 													}
+ 	// 													else{
+ 	// 														if (!(this.transiciones[etiqueta] === destino)) {
+ 	// 							 									let temp = {etiqueta}
+ 	// 															temp[etiqueta] = this.transiciones.etiqueta
+ 	// 															this.transiciones[etiqueta] = []
+ 	// 															this.transiciones[etiqueta].push(temp[etiqueta])
+ 	// 															this.transiciones[etiqueta].push(newobject[etiqueta])
+ 	// 														}
 
- 														}
+ 	// 													}
 
- 													}
- 													else{
- 														Object.assign(this.transiciones, newobject)
- 													}
+ 	// 												}
+ 	// 												else{
+ 	// 													Object.assign(this.transiciones, newobject)
+ 	// 												}
+
+  Estado.prototype.nuevaTransicionND = function(etiqueta,destino) { 
+
+  	if(etiqueta in this.transiciones){
+
+  		if (Array.isArray(this.transiciones[etiqueta])) {
+
+			if (!this.transiciones[etiqueta].includes(destino)) {
+
+				this.transiciones[etiqueta].push(destino)
+			}
+ 		}
+ 		else{
+
+ 			if(this.transiciones[etiqueta] != destino){
+
+ 				this.transiciones[etiqueta] = [this.transiciones[etiqueta],destino]
+
+ 				this.acepta = function(s){
+
+ 					if (s === "" ){
+						return this.esFinal
+					}
+					else{
+						let caracterAConsumir = s.head()
+						if (caracterAConsumir in this.transiciones) {
+							let siguientesEstados = this.transiciones[caracterAConsumir]
+							if(Array.isArray(siguientesEstados)){
+								
+								return siguientesEstados.some(function(e){return e.acepta(this.tail())},s)
+							}
+							else{
+								return siguientesEstados.acepta(s.tail())								
+							}
+						}
+						return false
+					}
+
+ 				}
+ 			}
+
+ 		}
+
+  	}
+  	else{
+  		this.nuevaTransicion(etiqueta,destino)
+  	}
+
+  }
 
 
-
-
-
-
-
-
- 												/*	if (Array.isArray(this.transiciones[etiqueta])) {
- 														if (!(destino in this.transiciones[etiqueta])){
- 															transiciones[etiqueta].push(destino)
- 														}
- 													}
-													else{ 
-														if (etiqueta in this.transiciones) {
-															let temp = {etiqueta}
- 															temp[etiqueta] = this.transiciones.etiqueta
- 															this.transiciones[etiqueta] = []
- 															this.transiciones[etiqueta].push(temp[etiqueta])
- 															this.transiciones[etiqueta].push(newobject[etiqueta])
-														}
-													else{
-															Object.assign(this.transiciones, newobject)
-														}
-
-
-
-													}*/
- 													
-
- 													/*if (etiqueta in this.transiciones){
- 														if (Array.isArray(this.transiciones[etiqueta])) {
- 															this.transiciones
- 														}
- 														else{
- 															let temp = {etiqueta}
- 															temp[etiqueta] = this.transiciones.etiqueta
- 															this.transiciones[etiqueta] = []
- 															this.transiciones[etiqueta].push(temp[etiqueta])
- 															this.transiciones[etiqueta]lo.push(newobject[etiqueta])
- 														}
- 													}
- 													else{
- 														Object.assign(this.transiciones,newobject)
- 													}*/
- 												}
 }
 
 // Ejercicio 7
 function ejercicio7() {
   // Completar
-  esDeterministico = undefined;
+  esDeterministico = function(q){
+
+  	for (etiqueta in q.transiciones){
+  		if(Array.isArray(q.transiciones[etiqueta]) ){
+  			return false
+  		}
+  		else{
+  			return esDeterministico(q.transiciones[etiqueta])
+  		}
+  	}
+  	return true
+  }
 
 }
 
@@ -410,6 +424,7 @@ function testEjercicio6(res) {
 
 // Test Ejercicio 7
 function testEjercicio7(res) {
+
   let q1_deterministico = esDeterministico(q1);
   let q2_deterministico = esDeterministico(q2);
   let q3_deterministico = esDeterministico(q3);
