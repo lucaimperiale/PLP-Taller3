@@ -34,8 +34,8 @@ function ejercicio2() {
 // Ejercicio 3
 function ejercicio3() {
   // Completar
-  Estado = function(esFinal,transiciones) { this.esFinal = esFinal 
-											this.transiciones = transiciones
+  Estado = function(esFinal,transiciones) { this.esFinal = esFinal
+											this.transiciones = Object.assign({},transiciones)
 											this.acepta =  function(s) {
 												if (s === "" ){
 													return this.esFinal
