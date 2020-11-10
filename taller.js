@@ -10,179 +10,171 @@ let esDeterministico;
 // Ejercicio 1
 function ejercicio1() {
   // Completar
-  qf = {esFinal : true, transiciones : {}, acepta : function(s){return (s === "")} };
-  q3 = {esFinal : true, transiciones : {}};
-  q2 = {esFinal : true, transiciones : {c : q3}};
-  q1 = {esFinal : false, transiciones : {b : q2, c : q3}};
-  q1.transiciones.a = q1;
-
+  qf = {
+  	esFinal: true, 
+  	transiciones: {}, 
+  	acepta: function(s){return s.length == 0;}
+  	};
+  q3 = {
+  	esFinal: true,
+  	transiciones: {}
+  	};
+  q2 = {
+  	esFinal: true,
+  	transiciones: {c: q3},
+  	};
+  q1 = {
+  	esFinal: false, 
+  	transiciones: {b: q2, c: q3}
+  	};
+  q1.transiciones["a"] = q1;
 }
 
 // Ejercicio 2
-
 function ejercicio2() {
-  String.prototype.head = function() {
-    return this.charAt(0);
-	}
+	String.prototype.head = function() { return this.charAt(0);}
 
-	String.prototype.tail = function() {
-    return this.slice(1);
-	}
-  
+	String.prototype.tail = function() { return this.slice(1);}  
 }
 
 // Ejercicio 3
 function ejercicio3() {
   // Completar
-  Estado = function(esFinal,transiciones) { this.esFinal = esFinal
-											this.transiciones = Object.assign({},transiciones)
-											this.acepta =  function(s) {
-												if (s === "" ){
-													return this.esFinal
-												}
-												else{
-													let caracterAConsumir = s.head()
-													if (caracterAConsumir in this.transiciones) {
-														let siguienteEstado = this.transiciones[caracterAConsumir]
-														return siguienteEstado.acepta(s.tail())
-													}
-													return false
-												}
-											} };
-											
-  let q = new Estado (true,{})
-
-  Object.setPrototypeOf(q1,q)
-  Object.setPrototypeOf(q2,q)
-  Object.setPrototypeOf(q3,q)
-  Object.setPrototypeOf(qf,q)
-  
+  Estado = function(esFinal, transiciones){
+  		this.esFinal = esFinal;
+  		this.transiciones = transiciones;
+  		this.acepta = function(s){
+  					//Si la cadena tiene largo cero, retorna true sii es un estado final
+  					if(s.length == 0)
+  						return this.esFinal;
+                 			else
+                 			{	
+                 				let caracterAConsumir = s.head();
+                 				if(caracterAConsumir in this.transiciones)                 				
+                 					//Vemos si la cola de la cadena es aceptada por el siguiente estado (transicionando con el primer caracter)
+  							return this.transiciones[caracterAConsumir].acepta(s.tail());  			
+  						
+  					}
+  					return false;
+  				};
+  	
+  		};
+  		
+  //Hacemos que todos los estados ya creados hereden el prototipo de q para que sepan responder al mensaje "acepta"
+  let q = new Estado (true,{});
+  Object.setPrototypeOf(q1,q);
+  Object.setPrototypeOf(q2,q);
+  Object.setPrototypeOf(q3,q);
+  Object.setPrototypeOf(qf,q);
 }
 
 // Ejercicio 4
 function ejercicio4() {
-  // Completar
- Estado.prototype.nuevaTransicion = function(etiqueta,destino) { if(!this.hasOwnProperty('transiciones'))
- 																	{		
- 													 					this.transiciones = {}
- 													 					Object.assign(this.transiciones,Object.getPrototypeOf(this).transiciones)
- 													 					this.transiciones[etiqueta] = destino
- 													 				} 
- 													 				else{
-	 													 				this.transiciones[etiqueta] = destino
- 													 				}
- 													 			}
+   Estado.prototype.nuevaTransicion = 
+   					function(etiqueta,destino) {    					
+   							//Hacemos una copia de transiciones para evitar aliasing		
+ 							let nuevasTransiciones = Object.assign({},Object.getPrototypeOf(this).transiciones);
+ 							nuevasTransiciones[etiqueta] = destino;
+ 							this.transiciones = nuevasTransiciones; 					 						
+ 					}
 
 }
 
 // Ejercicio 5
 function ejercicio5() {
   // Completar
-  algunoAcepta = function(s,qs) {if (Array.isArray(qs)) { 
-  									
-									return qs.some(function(elem){return elem.acepta(this)},s)
-  								}
-  								else {
-  									return qs.acepta(s)
-  									}
-								}
+  algunoAcepta = function(s,qs) {
+  			//Si qs es un array, vemos si alguno de los estados incluidos acepta la cadena s.
+  			if (Array.isArray(qs))  
+				return qs.some((element) => element.acepta(s));
+			//Si no es un array, es un estado individual. Chequeamos si el mismo acepta la cadena s.
+			else 
+  				return qs.acepta(s)
+  			
+		}
+  
+
   
 }
 
 // Ejercicio 6
 function ejercicio6() {
   // Completar
-  // Estado.prototype.nuevaTransicionND = function(etiqueta,destino) { let newobject = {etiqueta}
- 	// 												newobject[etiqueta] = destino
- 	// 												if (etiqueta in this.transiciones) {
- 	// 													if (Array.isArray(this.transiciones[etiqueta])) {
- 	// 														if (!(destino in this.transiciones[etiqueta])) {
- 	// 															this.transiciones[etiqueta].push(destino)
- 	// 														}
- 	// 													}
- 	// 													else{
- 	// 														if (!(this.transiciones[etiqueta] === destino)) {
- 	// 							 									let temp = {etiqueta}
- 	// 															temp[etiqueta] = this.transiciones.etiqueta
- 	// 															this.transiciones[etiqueta] = []
- 	// 															this.transiciones[etiqueta].push(temp[etiqueta])
- 	// 															this.transiciones[etiqueta].push(newobject[etiqueta])
- 	// 														}
+ 
+ Estado.prototype.nuevaTransicionND = function (etiqueta, destino) {
+	//Hacemos una copia de las transiciones para evitar aliasiang (usamos Array.from(...) para hacer una shallow copy en caso de que sea un array)
+	let nuevasTransiciones = {};
+	for(q in this.transiciones)
+		nuevasTransiciones[q] = Array.isArray(this.transiciones[q]) ? Array.from(this.transiciones[q]) : this.transiciones[q];
 
- 	// 													}
+	//Asignamos esta copia a this.transiciones
+	this.transiciones = nuevasTransiciones;
 
- 	// 												}
- 	// 												else{
- 	// 													Object.assign(this.transiciones, newobject)
- 	// 												}
-
-  Estado.prototype.nuevaTransicionND = function(etiqueta,destino) { 
-
-  	if(etiqueta in this.transiciones){
-
-  		if (Array.isArray(this.transiciones[etiqueta])) {
-
-			if (!this.transiciones[etiqueta].includes(destino)) {
-
-				this.transiciones[etiqueta].push(destino)
-			}
+	//Si la etiqueta ya forma parte de las transiciones
+	if (etiqueta in this.transiciones) {		
+		
+		//Si hay un array como destino
+		if (Array.isArray(this.transiciones[etiqueta])) {  			
+			//Si el destino no está dentro del array lo agregamos
+			if (!this.transiciones[etiqueta].includes(destino))			
+				this.transiciones[etiqueta].push(destino);			
  		}
- 		else{
-
- 			if(this.transiciones[etiqueta] != destino){
-
- 				this.transiciones[etiqueta] = [this.transiciones[etiqueta],destino]
-
- 				this.acepta = function(s){
-
- 					if (s === "" ){
-						return this.esFinal
-					}
-					else{
-						let caracterAConsumir = s.head()
-						if (caracterAConsumir in this.transiciones) {
-							let siguientesEstados = this.transiciones[caracterAConsumir]
-							if(Array.isArray(siguientesEstados)){
-								
-								return siguientesEstados.some(function(e){return e.acepta(this.tail())},s)
-							}
+ 		//El destino de esa etiqueta no es un array
+		else {			
+			//Si destino es diferente al destino asociado actual
+			if (this.transiciones[etiqueta] != destino) {
+				//Asignamos a esa etiqueta un array formado por el destino original y el destino a agregar				
+				this.transiciones[etiqueta] = [this.transiciones[etiqueta], destino];
+				
+				//Redefinimos la función de aceptación
+				this.acepta = function(s){
+ 							if (s.length == 0)
+								return this.esFinal;
+					
 							else{
-								return siguientesEstados.acepta(s.tail())								
+								let caracterAConsumir = s.head();
+								if (caracterAConsumir in this.transiciones) 									
+									return algunoAcepta(s.tail(), this.transiciones[caracterAConsumir]);							
+																		
+								return false;
 							}
-						}
-						return false
-					}
 
- 				}
- 			}
-
- 		}
-
-  	}
-  	else{
-  		this.nuevaTransicion(etiqueta,destino)
-  	}
-
-  }
-
-
+ 						}	
+			}
+		}
+	//La etiqueta no formaba parte de las transiciones (asociamos el destino pasado como parámetro)
+	} else {
+		this.transiciones[etiqueta] = destino
+	}
+} 
+  
 }
 
 // Ejercicio 7
 function ejercicio7() {
-  // Completar
-  esDeterministico = function(q){
-
-  	for (etiqueta in q.transiciones){
-  		if(Array.isArray(q.transiciones[etiqueta]) ){
-  			return false
-  		}
-  		else{
-  			return esDeterministico(q.transiciones[etiqueta])
-  		}
-  	}
-  	return true
-  }
+ 	 // Completar
+ 	 
+ 	esDeterministico = function (estado) {
+ 				//Usamos una función auxiliar que va marcando los estados visitados
+				return esDeterministicoMarcando(estado, []);
+			}
+  	
+  	esDeterministicoMarcando = function (estado, marcados) {
+  				//Si ya visité el estado, corto el recorrido para evitar ciclar infinitamente
+				if (marcados.includes(estado))
+					return true;			
+					
+				marcados.push(estado);	
+				
+				for(q in estado.transiciones)
+				{
+					//Reviso recursivamente y devuelvo false ni bien haya un estado que tenga un array como destino de una etiqueta
+					if(Array.isArray(estado.transiciones[q]) || !esDeterministicoMarcando(estado.transiciones[q], marcados))
+						return false;
+				}				
+				//Si recorrí todo y no encontré un estado que tenga un array como destino de una etiqueta, devuelvo true.
+				return true;								
+			}	
 
 }
 
@@ -424,7 +416,6 @@ function testEjercicio6(res) {
 
 // Test Ejercicio 7
 function testEjercicio7(res) {
-
   let q1_deterministico = esDeterministico(q1);
   let q2_deterministico = esDeterministico(q2);
   let q3_deterministico = esDeterministico(q3);
