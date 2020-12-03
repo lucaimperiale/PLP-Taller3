@@ -73,7 +73,7 @@ function ejercicio4() {
    Estado.prototype.nuevaTransicion = 
    					function(etiqueta,destino) {    					
    							//Hacemos una copia de transiciones para evitar aliasing		
- 							let nuevasTransiciones = Object.assign({},Object.getPrototypeOf(this).transiciones);
+ 							let nuevasTransiciones = Object.assign({},this.transiciones);
  							nuevasTransiciones[etiqueta] = destino;
  							this.transiciones = nuevasTransiciones; 					 						
  					}
@@ -334,6 +334,14 @@ function testEjercicio4(res) {
 	let qnuevo_acepta_ez = qnuevo.acepta("ez");
 	res.write("q5" + si_o_no(q5_acepta_ez) + "acepta la palabra \"ez\"", q5_acepta_ez);
 	res.write("qnuevo" + si_o_no(qnuevo_acepta_ez) + "acepta la palabra \"ez\"", !qnuevo_acepta_ez);
+
+	res.write("\nAgrego una nueva transición de q1 a q2 por m:");
+	q1.nuevaTransicion("m",  q2);
+	let q1_acepta_m = q1.acepta("m");
+	let q1_sigue_aceptando_b = q1.acepta("b");
+	res.write("q1" + si_o_no(q1_acepta_m) + "acepta la palabra \"m\"", q1_acepta_m);
+	res.write("q1" + si_o_no(q1_sigue_aceptando_b) + "acepta la palabra \"b\"", q1_sigue_aceptando_b);
+
 }
 
 // Test Ejercicio 5
